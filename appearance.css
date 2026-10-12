@@ -134,3 +134,6 @@ header .header-actions .navcta:hover { text-decoration:none; filter:brightness(1
   header .header-actions .navcta { padding:10px 12px; font-size:12px; }
   header .header-actions .appearance-control button { padding:8px; }
 }
+
+.footer-links { display:flex; align-items:center; flex-wrap:wrap; gap:12px 24px; }
+.footer-links a:hover { text-decoration:underline; text-underline-offset:4px; }
