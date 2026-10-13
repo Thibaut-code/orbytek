@@ -1,0 +1,63 @@
+
+name: Deploy Orbytek TEST
+
+on:
+  push:
+    branches:
+      - develop
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: orbytek-staging
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout develop
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Publish to staging repository
+        env:
+          GH_TOKEN: ${{ secrets.STAGING_DEPLOY_TOKEN }}
+        run: |
+          set -euo pipefail
+          test -n "$GH_TOKEN"
+
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git clone --branch main \
+            "https://x-access-token:${GH_TOKEN}@github.com/Thibaut-code/orbytek-staging.git" \
+            /tmp/orbytek-staging
+
+          rsync -a --delete \
+            --exclude='.git/' \
+            --exclude='.github/' \
+            --exclude='.gitignore' \
+            --exclude='CNAME' \
+            --exclude='node_modules/' \
+            --exclude='.env*' \
+            ./ /tmp/orbytek-staging/
+
+          cd /tmp/orbytek-staging
+
+          touch .nojekyll
+          printf '%s\n' 'test.orbytek.be' > CNAME
+          printf '%s\n' \
+            'User-agent: *' \
+            'Disallow: /' > robots.txt
+
+          git add -A
+
+          if ! git diff --cached --quiet; then
+            git commit -m "Deploy staging from develop"
+            git -c http.extraheader="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)" push origin main
+          fi
