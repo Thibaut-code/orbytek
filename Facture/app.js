@@ -491,6 +491,7 @@ function originalRender() {
   else if (route === "newclient") html = newClient();
   else if (route.startsWith("editclient/")) html = editClient(route.slice(11));
   else if (route === "company") html = companyView();
+  else if (route === "peppol" && typeof peppolView === 'function') html = peppolView();
   else if (route.startsWith("view/")) html = view(route.slice(5));
   else if (route === "docs")
     html = `${intro(filter === "facture" ? "Mes factures" : filter === "devis" ? "Mes devis" : "Devis et factures", "Tous vos documents, au même endroit.", `<div class="filter-row">${filter !== "devis" ? `<button class="primary" onclick="start('facture')">+ Ajouter une facture</button>` : ""}${filter !== "facture" ? `<button class="primary" onclick="start('devis')">+ Ajouter un devis</button>` : ""}</div>`)}<div class="filter-row">${[
@@ -1074,8 +1075,26 @@ function manageCatalog() {
   const entries = structuredClone(catalogForTheme());
   const dialog = featureDialog(
     "Mes prestations · " + PROFESSIONS[themeChoice].label,
-    '<p>Ces raccourcis sont enregistrés pour votre métier. Les lignes déjà ajoutées aux factures restent inchangées.</p><div id="catalog-editor"></div><button id="catalog-add">+ Nouvelle prestation</button><button class="primary" id="catalog-save">Enregistrer les prestations</button>',
+    '<p>Ces raccourcis sont enregistrés pour votre métier. Les lignes déjà ajoutées aux factures restent inchangées.</p><form id="catalog-search" class="catalog-search"><label class="field">Rechercher une prestation<input id="catalog-query" type="search" placeholder="Nom de la prestation"></label><button type="submit">Rechercher</button></form><p id="catalog-results" class="muted" role="status"></p><div id="catalog-editor"></div><button id="catalog-add">+ Nouvelle prestation</button><button class="primary" id="catalog-save">Enregistrer les prestations</button>',
   );
+  const searchInput = dialog.querySelector("#catalog-query");
+  const normalize = (value) => value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("fr").trim();
+  function filter() {
+    const query = normalize(searchInput.value);
+    let count = 0;
+    dialog.querySelectorAll(".catalog-edit").forEach((row) => {
+      row.hidden = !normalize(row.querySelector('[data-key="0"]').value).includes(query);
+      if (!row.hidden) count++;
+    });
+    dialog.querySelector("#catalog-results").textContent = query
+      ? (count ? `${count} prestation(s) trouvée(s).` : "Aucune prestation ne correspond à votre recherche.")
+      : "";
+  }
+  dialog.querySelector("#catalog-search").onsubmit = (event) => {
+    event.preventDefault();
+    filter();
+  };
+  searchInput.oninput = filter;
   function draw() {
     dialog.querySelector("#catalog-editor").innerHTML =
       entries
@@ -1084,6 +1103,7 @@ function manageCatalog() {
             `<div class="catalog-edit"><label>Prestation<input data-index="${i}" data-key="0" value="${esc(entry[0])}" maxlength="200"></label><label>Quantité<input type="number" min="0.01" step="0.01" data-index="${i}" data-key="1" value="${entry[1]}"></label><label>Prix HTVA<input type="number" min="0" step="0.01" data-index="${i}" data-key="2" value="${entry[2]}"></label><button data-remove="${i}" aria-label="Supprimer ${esc(entry[0])}">Supprimer</button></div>`,
         )
         .join("") || "<p>Aucune prestation enregistrée.</p>";
+    filter();
   }
   dialog.oninput = (e) => {
     if (e.target.dataset.index !== undefined)
@@ -1101,8 +1121,10 @@ function manageCatalog() {
     }
   };
   dialog.querySelector("#catalog-add").onclick = () => {
+    searchInput.value = "";
     entries.push(["", 1, 0]);
     draw();
+    dialog.querySelector(".catalog-edit:last-child input").focus();
   };
   dialog.querySelector("#catalog-save").onclick = async (e) => {
     if (
@@ -1370,10 +1392,12 @@ function logoHTML(value, shape = company.logo_shape) {
 }
 function companyView() {
   const logo = logoDirty ? logoDraft : company.logo;
-  return originalCompanyView().replace('<form id="companyform"', professionSettings() + teamSettings() + '<form id="companyform"')
+  const nameField = `<label class="field company-name-field">Nom de l’entreprise<input name="name" form="companyform" required value="${esc(company.name)}"></label>`;
+  return originalCompanyView().replace('<form id="companyform"', professionSettings() + nameField + teamSettings() + '<form id="companyform"')
+    .replace(/<label class="field">Nom de l’entreprise<input name="name" required value="[^"]*"><\/label>/, '')
     .replace(
-      '<label class="field">Nom de l’entreprise',
-      `<fieldset class="logo-editor"><legend>Logo de l’entreprise</legend><div id="logo-preview">${logoHTML(logo) || "<p>Aucun logo sélectionné.</p>"}</div><label class="field">Format du logo<select name="logo_shape" onchange="previewLogoShape(this.value)"><option value="rectangle" ${company.logo_shape !== 'square' ? 'selected' : ''}>Rectangle — maximum 190 × 100 px</option><option value="square" ${company.logo_shape === 'square' ? 'selected' : ''}>Carré — 120 × 120 px</option></select></label><label class="field">Choisir un logo (PNG, JPEG ou WebP, maximum 2 Mo)<input type="file" accept="image/png,image/jpeg,image/webp" onchange="selectLogo(this.files[0])"></label><button type="button" onclick="removeLogo()">Retirer le logo</button><p class="muted">Le logo sera affiché en haut des nouvelles factures et des devis. Enregistrez vos coordonnées pour conserver ce choix.</p></fieldset><label class="field">Nom de l’entreprise`,
+      '<form id="companyform" class="panel">',
+      `<form id="companyform" class="panel"><fieldset class="logo-editor"><legend>Logo de l’entreprise</legend><div id="logo-preview">${logoHTML(logo) || "<p>Aucun logo sélectionné.</p>"}</div><label class="field">Format du logo<select name="logo_shape" onchange="previewLogoShape(this.value)"><option value="rectangle" ${company.logo_shape !== 'square' ? 'selected' : ''}>Rectangle — maximum 190 × 100 px</option><option value="square" ${company.logo_shape === 'square' ? 'selected' : ''}>Carré — 120 × 120 px</option></select></label><label class="field">Choisir un logo (PNG, JPEG ou WebP, maximum 2 Mo)<input type="file" accept="image/png,image/jpeg,image/webp" onchange="selectLogo(this.files[0])"></label><button type="button" onclick="removeLogo()">Retirer le logo</button><p class="muted">Le logo sera affiché en haut des nouvelles factures et des devis. Enregistrez vos coordonnées pour conserver ce choix.</p></fieldset>`,
     )
     .replace(
       'name="iban"',

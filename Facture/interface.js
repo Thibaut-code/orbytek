@@ -18,6 +18,7 @@ let uiColumnReady = false;
 function uiStorageKey() { return `facture-facile-interface:${account?.id || 'guest'}`; }
 function localInterface() { try { return localStorage.getItem(uiStorageKey()); } catch { return null; } }
 const ICON_PATHS = {
+  peppol: '<path d="m12 3 8 5v8l-8 5-8-5V8zM4 8l16 8M20 8 4 16M12 3v18"/><circle cx="12" cy="3" r="2"/><circle cx="4" cy="16" r="2"/><circle cx="20" cy="16" r="2"/>',
   search: '<circle cx="10" cy="10" r="7"/><path d="m15 15 6 6"/>',
   home: '<path d="m3 10 9-7 9 7v11h-6v-7H9v7H3z"/>',
   docs: '<path d="M6 3h9l4 4v14H6zM14 3v5h5M9 12h7M9 16h7"/>',

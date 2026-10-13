@@ -4,6 +4,12 @@
 # working directory name when running `supabase init`.
 project_id = "Facture"
 
+[functions.peppol]
+verify_jwt = false # The handler validates the user JWT with auth.getUser.
+
+[functions.peppol-webhook]
+verify_jwt = false # Recommand authenticates using X-Signature (HMAC SHA-256).
+
 [api]
 enabled = true
 # Port to use for the API URL.
