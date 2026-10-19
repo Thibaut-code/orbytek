@@ -8,7 +8,7 @@ let requests=[],offline=false,errors=[];
 async function mock(route){
   const name=route.request().url().split('/').pop(),body=route.request().postDataJSON();requests.push({name,body});
   if(offline)return route.abort('internetdisconnected');
-  if(body.p_code!=='test-famille')return route.fulfill({status:403,json:{code:'42501',message:'Code familial incorrect'}});
+  if(body.p_code!=='courtois')return route.fulfill({status:403,json:{code:'42501',message:'Code familial incorrect'}});
   if(name==='albert_people')return route.fulfill({json:{people}});
   if(name==='albert_add_person'){
     const clean=body.p_name.trim().replace(/\s+/g,' '),existing=people.find(p=>p.name.toLocaleLowerCase('fr')===clean.toLocaleLowerCase('fr'));
@@ -21,7 +21,7 @@ async function mock(route){
   for(const change of body.p_changes){const k=C.key(body.p_person,change.id),old=rows[k];if((old?.revision||0)!==change.baseRevision){result.conflicts.push(old);continue;}rows[k]={person:body.p_person,id:change.id,kind:change.kind,data:change.data,revision:(old?.revision||0)+1};result.saved.push(rows[k]);}
   return route.fulfill({json:result});
 }
-async function login(context,person){const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));await page.clock.install();await page.goto('http://127.0.0.1:4189/');await page.locator(`[data-person="${person}"]`).click();await page.locator('#familyCode').fill('test-famille');await page.locator('#start').click();await page.locator('#workspace').waitFor({state:'visible'});return page;}
+async function login(context,person){const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));await page.clock.install();await page.goto('http://127.0.0.1:4189/');await page.locator(`[data-person="${person}"]`).click();await page.locator('#workspace').waitFor({state:'visible'});return page;}
 async function save(page){await page.locator('#saveNow').click();await page.waitForFunction(()=>document.querySelector('#status').textContent.startsWith('Enregistré en ligne'));}
 (async()=>{
   const browser=await chromium.launch({channel:'msedge',headless:true});

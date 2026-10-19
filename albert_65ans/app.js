@@ -294,8 +294,11 @@ window.addEventListener('beforeunload',event=>{if(person&&pendingCount()&&!local
   try{db=await openDB();store=await dbGet('albert-collaboratif-v2')||C.emptyStore();if(store.version!==2)throw Error('Version inconnue');localReady=true;
     const legacy=await dbGet('albert-questionnaire-v1');if(legacy&&!store.legacyImported)store.legacyBackup=legacy;await persist();
   }catch{welcomeNotice('Le stockage du navigateur est indisponible. Autorise-le puis recharge cette page pour préserver tes réponses.');return;}
-  const fragment=new URLSearchParams(location.hash.slice(1));familyCode=fragment.get('famille')||preference('code');
-  if(fragment.has('famille')){preference('code',familyCode);history.replaceState(null,'',location.pathname+location.search);}
+  const fragment=new URLSearchParams(location.hash.slice(1));
+  // Le code partagé actuel remplace aussi les anciens codes mémorisés et liens d’invitation.
+  familyCode=config.defaultFamilyCode||fragment.get('famille')||preference('code');
+  if(familyCode)preference('code',familyCode);
+  if(fragment.has('famille'))history.replaceState(null,'',location.pathname+location.search);
   C.registerPeople(store.people);renderPeople();$('#addPerson').disabled=false;await loadPeople();
   setInterval(()=>{if(person)void sync();else if($('#newPersonForm').hidden)void loadPeople();},config.syncIntervalMs||60000);
   const previous=preference('person');if(isActive(previous)&&familyCode)void selectPerson(previous);

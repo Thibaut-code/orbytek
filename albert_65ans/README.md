@@ -9,14 +9,14 @@ Le site statique utilise le projet Supabase existant d’Orbytek. Les réponses 
 1. Dans le SQL Editor du projet `dpwmxzptfgmkjecpuikb`, exécuter `supabase/setup.sql`. L’exécution peut être répétée sans effacer les réponses ni changer le code. Le résultat donne le lien familial complet et le code.
 2. Exécuter localement `_private/seed.sql` dans ce même SQL Editor pour conserver les souvenirs du questionnaire initial. Ce fichier contient des souvenirs personnels : il est ignoré par Git et ne doit pas être publié. L’insertion ne remplace aucune réponse existante.
 3. Publier dans le dossier `albert_65ans` du site de production : `index.html`, `questionnaire_albert_courtois.html`, `style.css`, `config.js`, `questionnaire-data.js`, `core.js`, `app.js`.
-4. Ouvrir le lien familial retourné par SQL sur deux appareils, choisir Maman et Jean-Paul, puis vérifier la sauvegarde et le partage. Le secret est transmis dans le fragment du lien et retiré de la barre d’adresse après ouverture. Il est mémorisé sur l’appareil pour les visites suivantes.
+4. Le code familial actuel est `courtois`, défini côté serveur et dans `config.js` (`defaultFamilyCode`). Il est utilisé automatiquement pour ouvrir un profil ou ajouter une personne, y compris sur un nouvel appareil. Il remplace les anciens codes mémorisés et ceux des anciens liens d’invitation. Ce code est public dans le site ; il ne constitue pas un secret. Lors d’une nouvelle activation, définir aussi `albert_private.settings.access_code` sur ce code. Ouvrir le site sur deux appareils, choisir Maman et Jean-Paul, puis vérifier la sauvegarde et le partage.
 
 Les profils sont un choix d’identité dans une famille de confiance, avec un code d’accès familial commun ; ils ne constituent pas des comptes authentifiés indépendants. Seules les réponses du profil choisi sont modifiables dans l’interface. Les fonctions de sauvegarde limitent chaque opération au profil transmis et à la ligne concernée.
 
 ## Utilisation
 
 - Le choix de personne précède l’ouverture du questionnaire. Changer de profil conserve les brouillons.
-- « Ajouter une personne » permet de saisir son prénom et de commencer à raconter. Le nouveau profil est partagé avec toute la famille. Un prénom déjà présent (sans distinction de majuscules ou d’espaces) reprend le profil existant. L’ajout nécessite une connexion et le lien ou le code familial.
+- « Ajouter une personne » permet de saisir son prénom et de commencer à raconter. Le nouveau profil est partagé avec toute la famille. Un prénom déjà présent (sans distinction de majuscules ou d’espaces) reprend le profil existant. L’ajout nécessite une connexion ; le code familial par défaut est transmis automatiquement.
 - Les réponses des autres portent leur prénom. « Je suis d’accord » copie leur réponse et leur note dans la version du profil actif. Le texte copié reste figé jusqu’à une nouvelle action explicite.
 - « Je veux apporter une précision » ouvre la version du profil actif à l’édition ; si une version personnelle existe déjà, elle est conservée. Les photos de l’autre personne restent visibles sans être dupliquées.
 - Brouillon local dans IndexedDB après chaque saisie (180 ms). Synchronisation et lecture des réponses partagées toutes les 60 secondes, au retour d’Internet, au retour sur l’onglet et via « Enregistrer maintenant ».
@@ -30,7 +30,7 @@ Les profils sont un choix d’identité dans une famille de confiance, avec un c
 
 `node --test tests/core.test.cjs` vérifie l’isolation des profils et la protection des écritures concurrentes. `node tests/browser.cjs` utilise Playwright et un serveur Supabase simulé : aucun souvenir de test n’est écrit sur la base réelle. Renseigner `ALBERT_NODE_MODULES` si Playwright n’est pas résolu localement. Les captures sont dans `output/` (ignoré par Git).
 
-Lancer `node serve.cjs` puis ouvrir http://127.0.0.1:4189/ pour l’aperçu. Le partage réel nécessite l’activation SQL et le code familial.
+Lancer `node serve.cjs` puis ouvrir http://127.0.0.1:4189/ pour l’aperçu. Le partage réel nécessite l’activation SQL et le même code familial côté serveur et dans la configuration. `node tests/family-access-browser.cjs` vérifie l’inscription sans saisie du code sur un nouvel appareil, avec un ancien code mémorisé et depuis un ancien lien, sans écrire sur la base réelle.
 
 ## Administration
 
