@@ -3,7 +3,13 @@
   else root.AlbertCore = factory();
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
   'use strict';
-  const PEOPLE = Object.freeze({ maman: 'Maman', 'jean-paul': 'Jean-Paul', thibaut: 'Thibaut' });
+  const PEOPLE = Object.assign(Object.create(null), { maman: 'Maman', 'jean-paul': 'Jean-Paul', thibaut: 'Thibaut' });
+  function registerPeople(people) {
+    for (const p of people || []) {
+      if (!p || !/^(maman|jean-paul|thibaut|p-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/.test(p.id) || typeof p.name !== 'string' || !p.name.trim() || p.name.length > 80) continue;
+      PEOPLE[p.id] = p.name;
+    }
+  }
   const clone = value => JSON.parse(JSON.stringify(value));
   const key = (person, id) => `${person}/${id}`;
   function emptyStore() { return { version: 2, records: {}, drafts: {}, lastSync: null }; }
@@ -59,5 +65,5 @@
       mode: precision ? 'precision' : 'agree', source: source.person,
       sourceRevision: source.revision, sourceAnswer: source.data.answer || '' });
   }
-  return { PEOPLE, clone, key, emptyStore, record, edit, batch, acknowledge, merge, resolve, hasContent, copyAnswer };
+  return { PEOPLE, registerPeople, clone, key, emptyStore, record, edit, batch, acknowledge, merge, resolve, hasContent, copyAnswer };
 });

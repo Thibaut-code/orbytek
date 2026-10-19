@@ -11,8 +11,16 @@ create table if not exists albert_private.settings (
 insert into albert_private.settings(id) values (true) on conflict do nothing;
 
 create table if not exists albert_private.questions (id text primary key);
+create table if not exists albert_private.people (
+  id text primary key,
+  name text not null check (length(name) between 1 and 80 and name=btrim(name)),
+  created_at timestamptz not null default now()
+);
+create unique index if not exists albert_people_name_unique on albert_private.people(lower(name));
+insert into albert_private.people(id,name) values ('maman','Maman'),('jean-paul','Jean-Paul'),('thibaut','Thibaut')
+on conflict do nothing;
 create table if not exists albert_private.records (
-  person text not null check (person in ('maman','jean-paul','thibaut')),
+  person text not null references albert_private.people(id),
   id text not null,
   kind text not null check (kind in ('question','conversation','anecdote')),
   data jsonb not null check (jsonb_typeof(data) = 'object'),
@@ -20,6 +28,14 @@ create table if not exists albert_private.records (
   updated_at timestamptz not null default now(),
   primary key (person, id)
 );
+-- Migration des trois profils fixes vers le registre partagé des participants.
+alter table albert_private.records drop constraint if exists records_person_check;
+do $$ begin
+  if not exists (select 1 from pg_constraint where conrelid='albert_private.records'::regclass and conname='records_person_fkey') then
+    alter table albert_private.records add constraint records_person_fkey foreign key(person) references albert_private.people(id);
+  end if;
+end $$;
+alter table albert_private.people enable row level security;
 alter table albert_private.settings enable row level security;
 alter table albert_private.questions enable row level security;
 alter table albert_private.records enable row level security;
@@ -33,13 +49,46 @@ from (values (0,9),(1,14),(2,15),(3,12),(4,13),(5,13),(6,11),
 cross join lateral generate_series(0,s.n-1) q(i)
 on conflict do nothing;
 
+create or replace function public.albert_people(p_code text)
+returns jsonb language plpgsql security definer set search_path = '' as $$
+begin
+  if p_code is null or not exists (select 1 from albert_private.settings where access_code=p_code) then
+    raise exception 'Code familial incorrect' using errcode='42501';
+  end if;
+  return jsonb_build_object('people',coalesce((select jsonb_agg(jsonb_build_object('id',id,'name',name)
+    order by case id when 'maman' then 0 when 'jean-paul' then 1 when 'thibaut' then 2 else 3 end,created_at,id)
+    from albert_private.people),'[]'::jsonb));
+end;
+$$;
+
+create or replace function public.albert_add_person(p_code text,p_name text)
+returns jsonb language plpgsql security definer set search_path = '' as $$
+declare clean_name text; participant albert_private.people%rowtype; created boolean:=false;
+begin
+  if p_code is null or not exists (select 1 from albert_private.settings where access_code=p_code) then
+    raise exception 'Code familial incorrect' using errcode='42501';
+  end if;
+  clean_name:=btrim(regexp_replace(p_name,'\s+',' ','g'));
+  if clean_name is null or length(clean_name) not between 1 and 80 or clean_name ~ '[[:cntrl:]]' then
+    raise exception 'Prénom ou nom invalide' using errcode='22023';
+  end if;
+  perform pg_advisory_xact_lock(hashtextextended('albert:people',0));
+  select * into participant from albert_private.people where lower(name)=lower(clean_name);
+  if not found then
+    insert into albert_private.people(id,name) values ('p-'||gen_random_uuid()::text,clean_name) returning * into participant;
+    created:=true;
+  end if;
+  return jsonb_build_object('person',jsonb_build_object('id',participant.id,'name',participant.name),'created',created);
+end;
+$$;
+
 create or replace function public.albert_snapshot(p_code text)
 returns jsonb language plpgsql security definer set search_path = '' as $$
 begin
   if p_code is null or not exists (select 1 from albert_private.settings where access_code = p_code) then
     raise exception 'Code familial incorrect' using errcode = '42501';
   end if;
-  return jsonb_build_object('records', coalesce((
+  return jsonb_build_object('people',public.albert_people(p_code)->'people','records', coalesce((
     select jsonb_agg(jsonb_build_object('person',r.person,'id',r.id,'kind',r.kind,
       'data',r.data,'revision',r.revision,'updatedAt',r.updated_at) order by r.person,r.id)
     from albert_private.records r
@@ -57,7 +106,7 @@ begin
   if p_code is null or not exists (select 1 from albert_private.settings where access_code = p_code) then
     raise exception 'Code familial incorrect' using errcode = '42501';
   end if;
-  if p_person is null or p_person not in ('maman','jean-paul','thibaut') then
+  if p_person is null or not exists (select 1 from albert_private.people where id=p_person) then
     raise exception 'Profil inconnu' using errcode = '22023';
   end if;
   if p_changes is null or jsonb_typeof(p_changes) <> 'array' then
@@ -128,8 +177,12 @@ end;
 $$;
 revoke all on function public.albert_snapshot(text) from public;
 revoke all on function public.albert_save(text,text,jsonb) from public;
+revoke all on function public.albert_people(text) from public;
+revoke all on function public.albert_add_person(text,text) from public;
 grant execute on function public.albert_snapshot(text) to anon, authenticated;
 grant execute on function public.albert_save(text,text,jsonb) to anon, authenticated;
+grant execute on function public.albert_people(text) to anon, authenticated;
+grant execute on function public.albert_add_person(text,text) to anon, authenticated;
 notify pgrst, 'reload schema';
 commit;
 

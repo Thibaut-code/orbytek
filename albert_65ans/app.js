@@ -11,6 +11,34 @@ function toast(text) { $('#toast').textContent = text; $('#toast').hidden = fals
 function status(text, tone = '') { $('#status').textContent = text; $('#saveDot').className = `save-dot ${tone}`; }
 function notice(text = '') { $('#connectionNotice').textContent = text; $('#connectionNotice').hidden = !text; }
 function welcomeNotice(text) { $('#welcomeStatus').textContent = text; $('#welcomeStatus').hidden = !text; }
+function renderPeople() {
+  const descriptions={maman:'Marianne','jean-paul':'Son frère',thibaut:'Son fils'}, colors=['rose','blue','sage'];
+  $('#people').innerHTML=Object.entries(C.PEOPLE).map(([id,name],i)=>`<button class="person" data-person="${id}"><span class="avatar ${colors[i%3]}">${esc(Array.from(name)[0]?.toLocaleUpperCase('fr'))}</span><strong>${esc(name)}</strong><small>${esc(descriptions[id]||'Un proche d’Albert')}</small><span class="person-arrow" aria-hidden="true">↗</span></button>`).join('');
+}
+function mergeSnapshot(result) {
+  if(Array.isArray(result.people)){store.people=result.people;C.registerPeople(result.people);renderPeople();}
+  C.merge(store,result.records);
+}
+async function loadPeople() {
+  if(!familyCode)return;
+  try{const result=await rpc('albert_people',{p_code:familyCode});store.people=result.people;C.registerPeople(result.people);renderPeople();await persist();}catch{ /* Les profils déjà connus restent disponibles hors connexion. */ }
+}
+function showPeople() {
+  $('#people').hidden=false;$('#addPerson').hidden=false;$('#accessForm').hidden=true;$('#newPersonForm').hidden=true;welcomeNotice('');renderPeople();
+}
+async function createPerson(event) {
+  event.preventDefault();const name=$('#newPersonName').value.trim().replace(/\s+/g,' ');
+  if(!name)return $('#newPersonName').focus();
+  const code=familyCode||$('#newPersonCode').value.trim();if(!code)return $('#newPersonCode').focus();
+  $('#createPerson').disabled=true;$('#cancelNewPerson').disabled=true;$('#newPersonStatus').hidden=true;
+  try{
+    const result=await rpc('albert_add_person',{p_code:code,p_name:name});familyCode=code;preference('code',code);
+    C.registerPeople([result.person]);store.people=[...(store.people||[]).filter(p=>p.id!==result.person.id),result.person];await persist();
+    $('#newPersonForm').hidden=true;$('#newPersonName').value='';if(!result.created)toast('Ce prénom est déjà dans la liste. Voici ses souvenirs.');
+    await selectPerson(result.person.id);
+  }catch(error){$('#newPersonStatus').textContent=error.code==='22023'?'Choisis un prénom ou un nom de 1 à 80 caractères.':error.code==='42501'?friendlyError(error):'Impossible d’ajouter une personne pour le moment. Vérifie ta connexion puis réessaie.';$('#newPersonStatus').hidden=false;}
+  finally{$('#createPerson').disabled=false;$('#cancelNewPerson').disabled=false;}
+}
 function formatTime(value) { return new Intl.DateTimeFormat('fr-BE', { hour: '2-digit', minute: '2-digit' }).format(new Date(value)); }
 function openDB() {
   return new Promise((resolve, reject) => {
@@ -68,7 +96,7 @@ async function sync() {
         await persist();
       }
       const result = await rpc('albert_snapshot', { p_code: familyCode });
-      C.merge(store, result.records); store.lastSync = new Date().toISOString(); onlineReady = true;
+      mergeSnapshot(result); store.lastSync = new Date().toISOString(); onlineReady = true;
       await persist();
       if (person === owner) {
         const conflicts = Object.values(store.drafts).filter(r => r.person === person && r.conflict).length;
@@ -94,7 +122,7 @@ function importLegacy(legacy) {
 }
 async function selectPerson(id) {
   if (!C.PEOPLE[id]) return;
-  chosen = id; $('#people').hidden = true; $('#accessForm').hidden = false; $('#selectedPerson').textContent = C.PEOPLE[id];
+  chosen = id; $('#people').hidden = true; $('#addPerson').hidden=true; $('#newPersonForm').hidden=true; $('#accessForm').hidden = false; $('#selectedPerson').textContent = C.PEOPLE[id];
   if (familyCode) { $('#familyCode').value = familyCode; await start(); } else $('#familyCode').focus();
 }
 async function start() {
@@ -102,7 +130,7 @@ async function start() {
   familyCode = $('#familyCode').value.trim(); if (!familyCode) return $('#familyCode').focus();
   $('#start').disabled = true; welcomeNotice('Ouverture des souvenirs…');
   try {
-    const result = await rpc('albert_snapshot', {p_code:familyCode}); C.merge(store, result.records); onlineReady = true; store.lastSync = new Date().toISOString();
+    const result = await rpc('albert_snapshot', {p_code:familyCode}); mergeSnapshot(result); onlineReady = true; store.lastSync = new Date().toISOString();
   } catch (error) {
     onlineReady = false;
     if (error.code === '42501' || !store.lastSync) { welcomeNotice(friendlyError(error)); $('#start').disabled = false; return; }
@@ -243,10 +271,12 @@ async function importBackup(event){const file=event.target.files[0];if(!file)ret
   if(!confirm(`Importer ${cleaned.length} souvenirs dans le profil ${C.PEOPLE[person]} ? Les réponses correspondantes de ce profil seront remplacées.`))return;
   for(const r of cleaned)C.edit(store,person,r.id,r.kind,r.data);await persist();render();status('Sauvegarde importée sur cet appareil · enregistrement en ligne en attente','pending');void sync();
  }catch(error){toast(error.message||'Fichier de sauvegarde non reconnu.');}finally{event.target.value='';}}
-$('#people').querySelectorAll('[data-person]').forEach(b=>b.onclick=()=>selectPerson(b.dataset.person));
-$('#chooseAgain').onclick=()=>{$('#people').hidden=false;$('#accessForm').hidden=true;welcomeNotice('');};
+$('#people').onclick=event=>{const button=event.target.closest('[data-person]');if(button&&!button.disabled)void selectPerson(button.dataset.person);};
+$('#chooseAgain').onclick=showPeople;
+$('#addPerson').onclick=()=>{$('#people').hidden=true;$('#addPerson').hidden=true;$('#newPersonForm').hidden=false;$('#newPersonCodeField').hidden=!!familyCode;$('#newPersonCode').required=!familyCode;$('#newPersonStatus').hidden=true;welcomeNotice('');$('#newPersonName').focus();};
+$('#newPersonForm').onsubmit=createPerson;$('#cancelNewPerson').onclick=showPeople;
 $('#accessForm').onsubmit=event=>{event.preventDefault();void start();};
-$('#changePerson').onclick=async()=>{await persist();await sync();person=null;chosen=null;preference('person','');$('#workspace').hidden=true;$('#welcome').hidden=false;$('#people').hidden=false;$('#accessForm').hidden=true;$('#changePerson').hidden=true;welcomeNotice('');window.scrollTo(0,0);};
+$('#changePerson').onclick=async()=>{await persist();await sync();person=null;chosen=null;preference('person','');$('#workspace').hidden=true;$('#welcome').hidden=false;$('#changePerson').hidden=true;showPeople();void loadPeople();window.scrollTo(0,0);};
 $('#saveNow').onclick=()=>sync();$('#search').oninput=filter;$('#unanswered').onchange=filter;
 $('#expand').onclick=()=>document.querySelectorAll('#form>.section:not([hidden])').forEach(el=>el.open=true);$('#collapse').onclick=()=>document.querySelectorAll('#form>.section').forEach(el=>el.open=false);
 $('#addDialog').onclick=()=>addScene('conversation');$('#addAnecdote').onclick=()=>addScene('anecdote');$('#export').onclick=download;$('#importFile').onchange=importBackup;
@@ -261,7 +291,7 @@ window.addEventListener('beforeunload',event=>{if(person&&pendingCount()&&!local
   }catch{welcomeNotice('Le stockage du navigateur est indisponible. Autorise-le puis recharge cette page pour préserver tes réponses.');return;}
   const fragment=new URLSearchParams(location.hash.slice(1));familyCode=fragment.get('famille')||preference('code');
   if(fragment.has('famille')){preference('code',familyCode);history.replaceState(null,'',location.pathname+location.search);}
-  $('#people').querySelectorAll('[data-person]').forEach(button=>button.disabled=false);
-  setInterval(()=>{if(person)void sync();},config.syncIntervalMs||60000);
+  C.registerPeople(store.people);renderPeople();$('#addPerson').disabled=false;await loadPeople();
+  setInterval(()=>{if(person)void sync();else if($('#newPersonForm').hidden)void loadPeople();},config.syncIntervalMs||60000);
   const previous=preference('person');if(C.PEOPLE[previous]&&familyCode)void selectPerson(previous);
 })();

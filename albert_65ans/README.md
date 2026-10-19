@@ -11,11 +11,12 @@ Le site statique utilise le projet Supabase existant d’Orbytek. Les réponses 
 3. Publier dans le dossier `albert_65ans` du site de production : `index.html`, `questionnaire_albert_courtois.html`, `style.css`, `config.js`, `questionnaire-data.js`, `core.js`, `app.js`.
 4. Ouvrir le lien familial retourné par SQL sur deux appareils, choisir Maman et Jean-Paul, puis vérifier la sauvegarde et le partage. Le secret est transmis dans le fragment du lien et retiré de la barre d’adresse après ouverture. Il est mémorisé sur l’appareil pour les visites suivantes.
 
-Les profils sont un choix d’identité dans une famille de confiance, avec un code d’accès familial commun ; ils ne constituent pas trois comptes authentifiés indépendants. Seules les réponses du profil choisi sont modifiables dans l’interface. Les fonctions de sauvegarde limitent chaque opération au profil transmis et à la ligne concernée.
+Les profils sont un choix d’identité dans une famille de confiance, avec un code d’accès familial commun ; ils ne constituent pas des comptes authentifiés indépendants. Seules les réponses du profil choisi sont modifiables dans l’interface. Les fonctions de sauvegarde limitent chaque opération au profil transmis et à la ligne concernée.
 
 ## Utilisation
 
 - Le choix de personne précède l’ouverture du questionnaire. Changer de profil conserve les brouillons.
+- « Ajouter une personne » permet de saisir son prénom et de commencer à raconter. Le nouveau profil est partagé avec toute la famille. Un prénom déjà présent (sans distinction de majuscules ou d’espaces) reprend le profil existant. L’ajout nécessite une connexion et le lien ou le code familial.
 - Les réponses des autres portent leur prénom. « Je suis d’accord » copie leur réponse et leur note dans la version du profil actif. Le texte copié reste figé jusqu’à une nouvelle action explicite.
 - « Je veux apporter une précision » ouvre la version du profil actif à l’édition ; si une version personnelle existe déjà, elle est conservée. Les photos de l’autre personne restent visibles sans être dupliquées.
 - Brouillon local dans IndexedDB après chaque saisie (180 ms). Synchronisation et lecture des réponses partagées toutes les 60 secondes, au retour d’Internet, au retour sur l’onglet et via « Enregistrer maintenant ».

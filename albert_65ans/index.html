@@ -7,11 +7,11 @@
   <meta name="referrer" content="no-referrer">
   <meta name="theme-color" content="#f6f3ec">
   <title>Les souvenirs d’Albert · Une BD en famille</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=20261019-people">
   <script defer src="config.js"></script>
   <script defer src="questionnaire-data.js"></script>
-  <script defer src="core.js"></script>
-  <script defer src="app.js"></script>
+  <script defer src="core.js?v=20261019-people"></script>
+  <script defer src="app.js?v=20261019-people"></script>
 </head>
 <body>
   <a class="skip" href="#form">Aller aux questions</a>
@@ -28,6 +28,16 @@
           <button class="person" data-person="jean-paul" disabled><span class="avatar blue">J</span><strong>Jean-Paul</strong><small>Son frère</small><span class="person-arrow" aria-hidden="true">↗</span></button>
           <button class="person" data-person="thibaut" disabled><span class="avatar sage">T</span><strong>Thibaut</strong><small>Son fils</small><span class="person-arrow" aria-hidden="true">↗</span></button>
         </div>
+        <button class="text-button add-person" id="addPerson" disabled>＋ Ajouter une personne</button>
+        <form id="newPersonForm" hidden>
+          <h2>Et toi, comment t’appelles-tu ?</h2>
+          <label for="newPersonName">Ton prénom ou ton nom</label>
+          <p class="muted small" id="nameHelp">Il accompagnera tes souvenirs et apparaîtra dans la liste pour toute la famille. Si tu y es déjà, choisis ton prénom dans la liste.</p>
+          <input id="newPersonName" type="text" maxlength="80" autocomplete="name" aria-describedby="nameHelp" placeholder="Par exemple : Arnaud" required>
+          <div id="newPersonCodeField" hidden><label for="newPersonCode">Le code de la famille</label><input id="newPersonCode" type="password" autocomplete="off"></div>
+          <div class="extra-actions" style="margin-top:18px"><button class="button primary" id="createPerson" type="submit">Ajouter et commencer →</button><button class="button subtle" id="cancelNewPerson" type="button">Revenir à la liste</button></div>
+          <p id="newPersonStatus" class="notice" role="status" hidden></p>
+        </form>
         <form id="accessForm" hidden>
           <div class="access-heading"><strong id="selectedPerson"></strong><button type="button" class="text-button" id="chooseAgain">Changer</button></div>
           <label for="familyCode">Le code de la famille</label><p id="codeHelp" class="muted small">Il accompagne le lien d’invitation. Il ne sera demandé qu’une fois sur cet appareil.</p>

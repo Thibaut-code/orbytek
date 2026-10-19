@@ -1,5 +1,12 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),C=require('../core.js');
 const source={person:'thibaut',id:'s0q0',kind:'question',revision:2,data:{answer:'20 octobre 1961',memory:'Date confirmée',photos:[]}};
+test('les nouveaux participants peuvent répondre sans toucher aux profils existants',()=>{
+  const id='p-12345678-1234-4234-8234-123456789abc',s=C.emptyStore();
+  C.registerPeople([{id,name:'Arnaud'},{id:'toString',name:'Incorrect'}]);
+  C.edit(s,id,'s0q0','question',{answer:'Mon souvenir'});
+  assert.equal(C.PEOPLE[id],'Arnaud');assert.equal(C.PEOPLE.thibaut,'Thibaut');assert.equal(C.PEOPLE.toString,undefined);
+  assert.equal(C.batch(s,id).length,1);assert.equal(C.batch(s,'thibaut').length,0);
+});
 test('un accord copie la réponse dans le seul profil actif',()=>{
   const s=C.emptyStore();s.records[C.key('thibaut','s0q0')]=C.clone(source);
   C.copyAnswer(s,'maman','s0q0',s.records['thibaut/s0q0'],false);
