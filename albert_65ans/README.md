@@ -41,3 +41,11 @@ Après `supabase/setup.sql`, appliquer `supabase/admin.sql`. Les participants on
 Le regroupement réunit les textes identiques par question et leurs auteurs, conserve chaque version différente et toutes les notes, conversations et anecdotes. Il n’invente aucune synthèse et ne remplace pas les originaux. Un export Markdown réunit l’ensemble ; la sauvegarde JSON inclut aussi les profils supprimés et leurs données. La galerie présente chaque photo avec son auteur, sa question ou sa conversation, un aperçu agrandi et un téléchargement.
 
 Contrôles : `node --test tests/core.test.cjs tests/admin-core.test.cjs`, puis `node tests/admin-browser.cjs` avec le serveur local. `supabase/verify-admin.sql` teste les permissions et la suppression/restauration dans une transaction annulée.
+
+## Personnages de la BD
+
+L’onglet « Personnages de la BD » contient des fiches indépendantes des participants au questionnaire : nom unique, indications (parenté, surnoms, époque) et jusqu’à huit photos de référence. Les images JPEG, PNG et WebP sont réduites avant enregistrement. Les fiches sont enregistrées dans `albert_private.characters` et accessibles uniquement par les fonctions administrateur. Les écritures utilisent une révision pour empêcher de remplacer une modification concurrente. La sauvegarde complète JSON contient aussi les fiches et les images.
+
+Activation : réexécuter `supabase/admin.sql` après `supabase/setup.sql`, puis publier les fichiers `admin.html`, `admin.js`, `admin.css` à jour. Sans la mise à jour SQL, l’onglet affiche un message d’activation et désactive l’ajout. Le questionnaire ne lit pas les portraits de référence.
+
+Pour préparer une illustration à partir d’un nom : consulter la fiche correspondante dans l’administration (ou `characters` dans l’export complet), lire les indications d’époque et inspecter les photos avant de les fournir comme références à la génération d’image. En cas d’homonymes, préciser les noms des fiches. Une absence de fiche ou de photo doit être signalée : ne pas inventer la ressemblance. Les photos ne sont pas chargées automatiquement dans la conversation ; elles doivent être consultées lors de la préparation de chaque illustration.
