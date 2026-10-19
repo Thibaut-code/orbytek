@@ -14,8 +14,10 @@ create table if not exists albert_private.questions (id text primary key);
 create table if not exists albert_private.people (
   id text primary key,
   name text not null check (length(name) between 1 and 80 and name=btrim(name)),
+  deleted_at timestamptz,
   created_at timestamptz not null default now()
 );
+alter table albert_private.people add column if not exists deleted_at timestamptz;
 create unique index if not exists albert_people_name_unique on albert_private.people(lower(name));
 insert into albert_private.people(id,name) values ('maman','Maman'),('jean-paul','Jean-Paul'),('thibaut','Thibaut')
 on conflict do nothing;
@@ -57,7 +59,7 @@ begin
   end if;
   return jsonb_build_object('people',coalesce((select jsonb_agg(jsonb_build_object('id',id,'name',name)
     order by case id when 'maman' then 0 when 'jean-paul' then 1 when 'thibaut' then 2 else 3 end,created_at,id)
-    from albert_private.people),'[]'::jsonb));
+    from albert_private.people where deleted_at is null),'[]'::jsonb));
 end;
 $$;
 
@@ -74,6 +76,9 @@ begin
   end if;
   perform pg_advisory_xact_lock(hashtextextended('albert:people',0));
   select * into participant from albert_private.people where lower(name)=lower(clean_name);
+  if found and participant.deleted_at is not null then
+    raise exception 'Ce prénom correspond à un profil supprimé. Demande à Thibaut de le restaurer.' using errcode='22023';
+  end if;
   if not found then
     insert into albert_private.people(id,name) values ('p-'||gen_random_uuid()::text,clean_name) returning * into participant;
     created:=true;
@@ -91,7 +96,7 @@ begin
   return jsonb_build_object('people',public.albert_people(p_code)->'people','records', coalesce((
     select jsonb_agg(jsonb_build_object('person',r.person,'id',r.id,'kind',r.kind,
       'data',r.data,'revision',r.revision,'updatedAt',r.updated_at) order by r.person,r.id)
-    from albert_private.records r
+    from albert_private.records r join albert_private.people p on p.id=r.person and p.deleted_at is null
   ),'[]'::jsonb));
 end;
 $$;
@@ -106,7 +111,11 @@ begin
   if p_code is null or not exists (select 1 from albert_private.settings where access_code = p_code) then
     raise exception 'Code familial incorrect' using errcode = '42501';
   end if;
-  if p_person is null or not exists (select 1 from albert_private.people where id=p_person) then
+  perform pg_advisory_xact_lock(hashtextextended('albert:' || coalesce(p_person,''), 0));
+  if exists(select 1 from albert_private.people where id=p_person and deleted_at is not null) then
+    raise exception 'Profil supprimé' using errcode='22023';
+  end if;
+  if p_person is null or not exists (select 1 from albert_private.people where id=p_person and deleted_at is null) then
     raise exception 'Profil inconnu' using errcode = '22023';
   end if;
   if p_changes is null or jsonb_typeof(p_changes) <> 'array' then
@@ -116,7 +125,6 @@ begin
     raise exception 'Sauvegarde trop volumineuse' using errcode = '22023';
   end if;
   -- Sérialise les écritures simultanées du même profil, y compris la première.
-  perform pg_advisory_xact_lock(hashtextextended('albert:' || p_person, 0));
   for change in select value from jsonb_array_elements(p_changes) loop
     if jsonb_typeof(change) <> 'object' or change->>'kind' is null
        or change->>'kind' not in ('question','conversation','anecdote')

@@ -13,15 +13,18 @@ function notice(text = '') { $('#connectionNotice').textContent = text; $('#conn
 function welcomeNotice(text) { $('#welcomeStatus').textContent = text; $('#welcomeStatus').hidden = !text; }
 function renderPeople() {
   const descriptions={maman:'Marianne','jean-paul':'Son frère',thibaut:'Son fils'}, colors=['rose','blue','sage'];
-  $('#people').innerHTML=Object.entries(C.PEOPLE).map(([id,name],i)=>`<button class="person" data-person="${id}"><span class="avatar ${colors[i%3]}">${esc(Array.from(name)[0]?.toLocaleUpperCase('fr'))}</span><strong>${esc(name)}</strong><small>${esc(descriptions[id]||'Un proche d’Albert')}</small><span class="person-arrow" aria-hidden="true">↗</span></button>`).join('');
+  const people=store.people||Object.entries(C.PEOPLE).map(([id,name])=>({id,name}));
+  $('#people').innerHTML=people.map(({id,name},i)=>`<button class="person" data-person="${esc(id)}"><span class="avatar ${colors[i%3]}">${esc(Array.from(name)[0]?.toLocaleUpperCase('fr'))}</span><strong>${esc(name)}</strong><small>${esc(descriptions[id]||'Un proche d’Albert')}</small><span class="person-arrow" aria-hidden="true">↗</span></button>`).join('');
 }
+function isActive(id){return Array.isArray(store.people)?store.people.some(p=>p.id===id):!!C.PEOPLE[id];}
+function removedProfile(){person=null;chosen=null;preference('person','');$('#workspace').hidden=true;$('#welcome').hidden=false;$('#changePerson').hidden=true;showPeople();welcomeNotice('Ce profil a été supprimé par l’administrateur. Choisis une autre personne pour continuer.');}
 function mergeSnapshot(result) {
   if(Array.isArray(result.people)){store.people=result.people;C.registerPeople(result.people);renderPeople();}
-  C.merge(store,result.records);
+  C.replaceRecords(store,result.records);
 }
 async function loadPeople() {
   if(!familyCode)return;
-  try{const result=await rpc('albert_people',{p_code:familyCode});store.people=result.people;C.registerPeople(result.people);renderPeople();await persist();}catch{ /* Les profils déjà connus restent disponibles hors connexion. */ }
+  try{const result=await rpc('albert_people',{p_code:familyCode});store.people=result.people;C.registerPeople(result.people);renderPeople();await persist();if(person&&!isActive(person))removedProfile();}catch{ /* Les profils déjà connus restent disponibles hors connexion. */ }
 }
 function showPeople() {
   $('#people').hidden=false;$('#addPerson').hidden=false;$('#accessForm').hidden=true;$('#newPersonForm').hidden=true;welcomeNotice('');renderPeople();
@@ -36,7 +39,7 @@ async function createPerson(event) {
     C.registerPeople([result.person]);store.people=[...(store.people||[]).filter(p=>p.id!==result.person.id),result.person];await persist();
     $('#newPersonForm').hidden=true;$('#newPersonName').value='';if(!result.created)toast('Ce prénom est déjà dans la liste. Voici ses souvenirs.');
     await selectPerson(result.person.id);
-  }catch(error){$('#newPersonStatus').textContent=error.code==='22023'?'Choisis un prénom ou un nom de 1 à 80 caractères.':error.code==='42501'?friendlyError(error):'Impossible d’ajouter une personne pour le moment. Vérifie ta connexion puis réessaie.';$('#newPersonStatus').hidden=false;}
+  }catch(error){$('#newPersonStatus').textContent=error.code==='22023'?(error.message.startsWith('Ce prénom')?error.message:'Choisis un prénom ou un nom de 1 à 80 caractères.'):error.code==='42501'?friendlyError(error):'Impossible d’ajouter une personne pour le moment. Vérifie ta connexion puis réessaie.';$('#newPersonStatus').hidden=false;}
   finally{$('#createPerson').disabled=false;$('#cancelNewPerson').disabled=false;}
 }
 function formatTime(value) { return new Intl.DateTimeFormat('fr-BE', { hour: '2-digit', minute: '2-digit' }).format(new Date(value)); }
@@ -98,6 +101,7 @@ async function sync() {
       const result = await rpc('albert_snapshot', { p_code: familyCode });
       mergeSnapshot(result); store.lastSync = new Date().toISOString(); onlineReady = true;
       await persist();
+      if(!isActive(owner)){removedProfile();return false;}
       if (person === owner) {
         const conflicts = Object.values(store.drafts).filter(r => r.person === person && r.conflict).length;
         notice(conflicts ? 'Ce profil a aussi été modifié sur un autre appareil. Choisis la version à garder dans les souvenirs signalés.' : '');
@@ -105,7 +109,7 @@ async function sync() {
         refreshRemote(); updateProgress();
       }
       return true;
-    } catch (error) { onlineReady = false; if (person === owner) { notice(friendlyError(error)); status(localReady ? 'Brouillon local conservé · partage en attente' : 'Enregistrement indisponible · télécharge une copie', 'error'); } return false; }
+    } catch (error) { onlineReady = false; if(error.message==='Profil supprimé'){await loadPeople();removedProfile();return false;} if (person === owner) { notice(friendlyError(error)); status(localReady ? 'Brouillon local conservé · partage en attente' : 'Enregistrement indisponible · télécharge une copie', 'error'); } return false; }
     finally { syncing = null; }
   })();
   return syncing;
@@ -121,7 +125,7 @@ function importLegacy(legacy) {
   for (const scene of legacy.dialogs || []) { const id = crypto.randomUUID(); C.edit(store, 'thibaut', id, 'conversation', {...scene, photos:validPhotos(scene.photos), createdAt:new Date().toISOString()}); }
 }
 async function selectPerson(id) {
-  if (!C.PEOPLE[id]) return;
+  if (!isActive(id)) return;
   chosen = id; $('#people').hidden = true; $('#addPerson').hidden=true; $('#newPersonForm').hidden=true; $('#accessForm').hidden = false; $('#selectedPerson').textContent = C.PEOPLE[id];
   if (familyCode) { $('#familyCode').value = familyCode; await start(); } else $('#familyCode').focus();
 }
@@ -135,6 +139,7 @@ async function start() {
     onlineReady = false;
     if (error.code === '42501' || !store.lastSync) { welcomeNotice(friendlyError(error)); $('#start').disabled = false; return; }
   }
+  if(!isActive(chosen)){showPeople();welcomeNotice('Ce profil a été supprimé par l’administrateur.');$('#start').disabled=false;return;}
   person = chosen;
   if(person==='thibaut' && store.legacyBackup && !store.legacyImported) {importLegacy(store.legacyBackup);store.legacyImported=true;delete store.legacyBackup;}
   preference('code', familyCode); preference('person', person); await persist();
@@ -293,5 +298,5 @@ window.addEventListener('beforeunload',event=>{if(person&&pendingCount()&&!local
   if(fragment.has('famille')){preference('code',familyCode);history.replaceState(null,'',location.pathname+location.search);}
   C.registerPeople(store.people);renderPeople();$('#addPerson').disabled=false;await loadPeople();
   setInterval(()=>{if(person)void sync();else if($('#newPersonForm').hidden)void loadPeople();},config.syncIntervalMs||60000);
-  const previous=preference('person');if(C.PEOPLE[previous]&&familyCode)void selectPerson(previous);
+  const previous=preference('person');if(isActive(previous)&&familyCode)void selectPerson(previous);
 })();

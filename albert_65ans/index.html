@@ -10,8 +10,8 @@
   <link rel="stylesheet" href="style.css?v=20261019-people">
   <script defer src="config.js"></script>
   <script defer src="questionnaire-data.js"></script>
-  <script defer src="core.js?v=20261019-people"></script>
-  <script defer src="app.js?v=20261019-people"></script>
+  <script defer src="core.js?v=20261019-admin"></script>
+  <script defer src="app.js?v=20261019-admin"></script>
 </head>
 <body>
   <a class="skip" href="#form">Aller aux questions</a>
@@ -58,7 +58,7 @@
       <section class="extras" id="extras"><span class="eyebrow">LES PETITES HISTOIRES FONT LA GRANDE</span><h2>Encore un souvenir ?</h2><p class="muted">Une conversation marquante, un fou rire, un détail qui mérite sa place dans la BD…</p><div class="extra-actions"><button class="button primary" id="addDialog">＋ Ajouter une conversation</button><button class="button secondary" id="addAnecdote">＋ Ajouter une anecdote</button></div><div id="sceneList"></div></section>
       <details class="backup"><summary>Garder une copie de mes souvenirs</summary><p class="small muted">Télécharge une copie de tes réponses et photos, ou reprends une ancienne sauvegarde dans ton profil.</p><div class="extra-actions"><button class="button secondary" id="export">Télécharger ma sauvegarde</button><label class="button secondary" for="importFile">Reprendre une sauvegarde</label><input id="importFile" type="file" accept="application/json,.json" hidden><button class="button subtle" id="print">Imprimer / PDF</button></div></details>
     </div>
-    <footer><span class="footer-mark">a.</span> Une BD pour Albert. Des souvenirs de nous tous.<small id="footerInfo">Un projet familial, préparé avec amour.</small></footer>
+    <footer><span class="footer-mark">a.</span> Une BD pour Albert. Des souvenirs de nous tous.<small id="footerInfo">Un projet familial, préparé avec amour.</small><a class="text-button" href="admin.html">Administration</a></footer>
   </main>
   <div id="toast" class="toast" role="status" hidden></div>
   <noscript><p class="notice">Active JavaScript pour ouvrir et sauvegarder le questionnaire.</p></noscript>

@@ -55,6 +55,11 @@
       delete store.drafts[k].conflict;
     } else delete store.drafts[k];
   }
+  function replaceRecords(store, rows) {
+    const present=new Set(rows.map(r=>key(r.person,r.id)));
+    for(const k of Object.keys(store.records))if(!present.has(k))delete store.records[k];
+    merge(store,rows);
+  }
   function hasContent(data) { return !!(data && (data.answer?.trim() || data.memory?.trim() || data.photos?.length)); }
   function copyAnswer(store, person, id, source, precision) {
     if (source.person === person || source.kind !== 'question') throw Error('Réponse source invalide');
@@ -65,5 +70,5 @@
       mode: precision ? 'precision' : 'agree', source: source.person,
       sourceRevision: source.revision, sourceAnswer: source.data.answer || '' });
   }
-  return { PEOPLE, registerPeople, clone, key, emptyStore, record, edit, batch, acknowledge, merge, resolve, hasContent, copyAnswer };
+  return { PEOPLE, registerPeople, clone, key, emptyStore, record, edit, batch, acknowledge, merge, replaceRecords, resolve, hasContent, copyAnswer };
 });

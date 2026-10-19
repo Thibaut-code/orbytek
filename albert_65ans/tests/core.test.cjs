@@ -1,5 +1,9 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),C=require('../core.js');
 const source={person:'thibaut',id:'s0q0',kind:'question',revision:2,data:{answer:'20 octobre 1961',memory:'Date confirmée',photos:[]}};
+test('un instantané retire les contributions supprimées du cache sans effacer les brouillons locaux',()=>{
+  const s=C.emptyStore();s.records['thibaut/s0q0']=C.clone(source);C.edit(s,'thibaut','s0q0','question',{answer:'Brouillon à conserver'});
+  C.replaceRecords(s,[]);assert.equal(Object.keys(s.records).length,0);assert.equal(C.record(s,'thibaut','s0q0').data.answer,'Brouillon à conserver');
+});
 test('les nouveaux participants peuvent répondre sans toucher aux profils existants',()=>{
   const id='p-12345678-1234-4234-8234-123456789abc',s=C.emptyStore();
   C.registerPeople([{id,name:'Arnaud'},{id:'toString',name:'Incorrect'}]);

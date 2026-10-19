@@ -31,3 +31,13 @@ Les profils sont un choix d’identité dans une famille de confiance, avec un c
 `node --test tests/core.test.cjs` vérifie l’isolation des profils et la protection des écritures concurrentes. `node tests/browser.cjs` utilise Playwright et un serveur Supabase simulé : aucun souvenir de test n’est écrit sur la base réelle. Renseigner `ALBERT_NODE_MODULES` si Playwright n’est pas résolu localement. Les captures sont dans `output/` (ignoré par Git).
 
 Lancer `node serve.cjs` puis ouvrir http://127.0.0.1:4189/ pour l’aperçu. Le partage réel nécessite l’activation SQL et le code familial.
+
+## Administration
+
+Adresse : **https://orbytek.be/albert_65ans/admin.html**. Le mot de passe fixe demandé est `vasco`, vérifié dans les fonctions SQL côté serveur à chaque lecture ou modification. Il est conservé uniquement en mémoire pendant la session de la page admin.
+
+Après `supabase/setup.sql`, appliquer `supabase/admin.sql`. Les participants ont maintenant une colonne `deleted_at` ; leurs données restent préservées lors d’une suppression et sont restaurables depuis la page admin. Les profils supprimés et leurs contributions disparaissent du questionnaire, du regroupement actif et de la galerie. Le serveur bloque leurs sauvegardes, y compris depuis un ancien onglet. Leurs prénoms restent réservés pour éviter une recréation involontaire du profil.
+
+Le regroupement réunit les textes identiques par question et leurs auteurs, conserve chaque version différente et toutes les notes, conversations et anecdotes. Il n’invente aucune synthèse et ne remplace pas les originaux. Un export Markdown réunit l’ensemble ; la sauvegarde JSON inclut aussi les profils supprimés et leurs données. La galerie présente chaque photo avec son auteur, sa question ou sa conversation, un aperçu agrandi et un téléchargement.
+
+Contrôles : `node --test tests/core.test.cjs tests/admin-core.test.cjs`, puis `node tests/admin-browser.cjs` avec le serveur local. `supabase/verify-admin.sql` teste les permissions et la suppression/restauration dans une transaction annulée.
