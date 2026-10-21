@@ -13,7 +13,7 @@ create unique index if not exists characters_name_unique on albert_private.chara
 alter table albert_private.characters enable row level security;
 revoke all on albert_private.characters from public,anon,authenticated;
 create or replace function public.albert_admin_snapshot(p_password text)
-returns jsonb language plpgsql security definer set search_path='' as $$
+returns jsonb language plpgsql security definer set search_path='' set statement_timeout='15s' as $$
 declare family_code text; snapshot jsonb;
 begin
   if p_password is distinct from 'vasco' then

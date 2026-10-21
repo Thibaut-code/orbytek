@@ -36,6 +36,8 @@ Lancer `node serve.cjs` puis ouvrir http://127.0.0.1:4189/ pour l’aperçu. Le 
 
 Adresse : **https://orbytek.be/albert_65ans/admin.html**. Le mot de passe fixe demandé est `vasco`, vérifié dans les fonctions SQL côté serveur à chaque lecture ou modification. Il est conservé uniquement en mémoire pendant la session de la page admin.
 
+Le chargement complet de l’administration inclut les photos des personnages. La fonction `albert_admin_snapshot` dispose d’un délai SQL de 15 secondes pour charger ces données. Pour mettre à jour une installation existante sans réappliquer les autres fonctions, exécuter `supabase/admin-snapshot-timeout.sql`. Les délais des autres fonctions et applications restent inchangés.
+
 Après `supabase/setup.sql`, appliquer `supabase/admin.sql`. Les participants ont maintenant une colonne `deleted_at` ; leurs données restent préservées lors d’une suppression et sont restaurables depuis la page admin. Les profils supprimés et leurs contributions disparaissent du questionnaire, du regroupement actif et de la galerie. Le serveur bloque leurs sauvegardes, y compris depuis un ancien onglet. Leurs prénoms restent réservés pour éviter une recréation involontaire du profil.
 
 Le regroupement réunit les textes identiques par question et leurs auteurs, conserve chaque version différente et toutes les notes, conversations et anecdotes. Il n’invente aucune synthèse et ne remplace pas les originaux. Un export Markdown réunit l’ensemble ; la sauvegarde JSON inclut aussi les profils supprimés et leurs données. La galerie présente chaque photo avec son auteur, sa question ou sa conversation, un aperçu agrandi et un téléchargement.
