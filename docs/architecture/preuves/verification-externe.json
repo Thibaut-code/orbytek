@@ -1,0 +1,541 @@
+{
+  "date": "2026-11-04T20:53:44.038Z",
+  "dns": [
+    {
+      "name": "_dmarc.orbytek.be",
+      "type": "A",
+      "error": "ENOTFOUND"
+    },
+    {
+      "name": "www.orbytek.be",
+      "type": "A",
+      "answer": [
+        "185.199.108.153",
+        "185.199.109.153",
+        "185.199.110.153",
+        "185.199.111.153"
+      ]
+    },
+    {
+      "name": "orbytek.be",
+      "type": "A",
+      "answer": [
+        "185.199.111.153",
+        "185.199.108.153",
+        "185.199.109.153",
+        "185.199.110.153"
+      ]
+    },
+    {
+      "name": "test.orbytek.be",
+      "type": "A",
+      "answer": [
+        "185.199.108.153",
+        "185.199.109.153",
+        "185.199.110.153",
+        "185.199.111.153"
+      ]
+    },
+    {
+      "name": "_dmarc.orbytek.be",
+      "type": "AAAA",
+      "error": "ENOTFOUND"
+    },
+    {
+      "name": "www.orbytek.be",
+      "type": "AAAA",
+      "answer": [
+        "2606:50c0:8001::153",
+        "2606:50c0:8003::153",
+        "2606:50c0:8002::153",
+        "2606:50c0:8000::153"
+      ]
+    },
+    {
+      "name": "test.orbytek.be",
+      "type": "AAAA",
+      "answer": [
+        "2606:50c0:8002::153",
+        "2606:50c0:8003::153",
+        "2606:50c0:8000::153",
+        "2606:50c0:8001::153"
+      ]
+    },
+    {
+      "name": "orbytek.be",
+      "type": "AAAA",
+      "error": "ENODATA"
+    },
+    {
+      "name": "_dmarc.orbytek.be",
+      "type": "CNAME",
+      "error": "ENOTFOUND"
+    },
+    {
+      "name": "www.orbytek.be",
+      "type": "CNAME",
+      "answer": [
+        "thibaut-code.github.io"
+      ]
+    },
+    {
+      "name": "test.orbytek.be",
+      "type": "CNAME",
+      "answer": [
+        "thibaut-code.github.io"
+      ]
+    },
+    {
+      "name": "orbytek.be",
+      "type": "CNAME",
+      "error": "ENODATA"
+    },
+    {
+      "name": "_dmarc.orbytek.be",
+      "type": "NS",
+      "error": "ENOTFOUND"
+    },
+    {
+      "name": "test.orbytek.be",
+      "type": "NS",
+      "error": "ENODATA"
+    },
+    {
+      "name": "www.orbytek.be",
+      "type": "NS",
+      "error": "ENODATA"
+    },
+    {
+      "name": "orbytek.be",
+      "type": "NS",
+      "answer": [
+        "dns111.ovh.net",
+        "ns111.ovh.net"
+      ]
+    },
+    {
+      "name": "_dmarc.orbytek.be",
+      "type": "MX",
+      "error": "ENOTFOUND"
+    },
+    {
+      "name": "test.orbytek.be",
+      "type": "MX",
+      "answer": []
+    },
+    {
+      "name": "www.orbytek.be",
+      "type": "MX",
+      "answer": []
+    },
+    {
+      "name": "orbytek.be",
+      "type": "MX",
+      "answer": [
+        {
+          "exchange": "mx1.mail.ovh.net",
+          "priority": 1,
+          "type": "MX"
+        },
+        {
+          "exchange": "mx3.mail.ovh.net",
+          "priority": 100,
+          "type": "MX"
+        },
+        {
+          "exchange": "mx2.mail.ovh.net",
+          "priority": 5,
+          "type": "MX"
+        }
+      ]
+    },
+    {
+      "name": "_dmarc.orbytek.be",
+      "type": "TXT",
+      "error": "ENOTFOUND"
+    },
+    {
+      "name": "www.orbytek.be",
+      "type": "TXT",
+      "answer": []
+    },
+    {
+      "name": "test.orbytek.be",
+      "type": "TXT",
+      "answer": []
+    },
+    {
+      "name": "orbytek.be",
+      "type": "TXT",
+      "answer": [
+        [
+          "1|www.orbytek.be"
+        ],
+        [
+          "google-site-verification=VQmXAZrTINwhw0OIhe1UOzpG6-ghwFBkTS7kULQRn_Y"
+        ],
+        [
+          "v=spf1 include:mx.ovh.com -all"
+        ]
+      ]
+    }
+  ],
+  "http": [
+    {
+      "url": "http://orbytek.be/",
+      "status": 301,
+      "headers": {
+        "server": "GitHub.com",
+        "location": "https://orbytek.be/",
+        "content-type": "text/html",
+        "strict-transport-security": null,
+        "cache-control": null
+      }
+    },
+    {
+      "url": "https://orbytek.be/Coiffeur/",
+      "status": 404,
+      "headers": {
+        "server": "GitHub.com",
+        "location": null,
+        "content-type": "text/html; charset=utf-8",
+        "strict-transport-security": null,
+        "cache-control": null
+      }
+    },
+    {
+      "url": "https://orbytek.be/Archive/",
+      "status": 200,
+      "headers": {
+        "server": "GitHub.com",
+        "location": null,
+        "content-type": "text/html; charset=utf-8",
+        "strict-transport-security": null,
+        "cache-control": "max-age=600"
+      }
+    },
+    {
+      "url": "https://orbytek.be/Facture/",
+      "status": 200,
+      "headers": {
+        "server": "GitHub.com",
+        "location": null,
+        "content-type": "text/html; charset=utf-8",
+        "strict-transport-security": null,
+        "cache-control": "max-age=600"
+      }
+    },
+    {
+      "url": "https://orbytek.be/voiture/",
+      "status": 404,
+      "headers": {
+        "server": "GitHub.com",
+        "location": null,
+        "content-type": "text/html; charset=utf-8",
+        "strict-transport-security": null,
+        "cache-control": null
+      }
+    },
+    {
+      "url": "https://orbytek.be/BD/albert/",
+      "status": 200,
+      "headers": {
+        "server": "GitHub.com",
+        "location": null,
+        "content-type": "text/html; charset=utf-8",
+        "strict-transport-security": null,
+        "cache-control": "max-age=600"
+      }
+    },
+    {
+      "url": "https://orbytek.be/",
+      "status": 200,
+      "headers": {
+        "server": "GitHub.com",
+        "location": null,
+        "content-type": "text/html; charset=utf-8",
+        "strict-transport-security": null,
+        "cache-control": "max-age=600"
+      }
+    },
+    {
+      "url": "https://orbytek.be/Chauffagiste2/",
+      "status": 404,
+      "headers": {
+        "server": "GitHub.com",
+        "location": null,
+        "content-type": "text/html; charset=utf-8",
+        "strict-transport-security": null,
+        "cache-control": null
+      }
+    },
+    {
+      "url": "https://orbytek.be/Chauffagiste3/",
+      "status": 404,
+      "headers": {
+        "server": "GitHub.com",
+        "location": null,
+        "content-type": "text/html; charset=utf-8",
+        "strict-transport-security": null,
+        "cache-control": null
+      }
+    },
+    {
+      "url": "https://www.orbytek.be/",
+      "status": 301,
+      "headers": {
+        "server": "GitHub.com",
+        "location": "https://orbytek.be/",
+        "content-type": "text/html",
+        "strict-transport-security": null,
+        "cache-control": null
+      }
+    },
+    {
+      "url": "https://test.orbytek.be/",
+      "status": 200,
+      "headers": {
+        "server": "GitHub.com",
+        "location": null,
+        "content-type": "text/html; charset=utf-8",
+        "strict-transport-security": null,
+        "cache-control": "max-age=600"
+      }
+    },
+    {
+      "url": "https://orbytek.be/Voitures/",
+      "status": 200,
+      "headers": {
+        "server": "GitHub.com",
+        "location": null,
+        "content-type": "text/html; charset=utf-8",
+        "strict-transport-security": null,
+        "cache-control": "max-age=600"
+      }
+    },
+    {
+      "url": "https://orbytek.be/albert_65ans/admin.html",
+      "status": 200,
+      "headers": {
+        "server": "GitHub.com",
+        "location": null,
+        "content-type": "text/html; charset=utf-8",
+        "strict-transport-security": null,
+        "cache-control": "max-age=600"
+      }
+    },
+    {
+      "url": "https://orbytek.be/Chauffagiste/",
+      "status": 200,
+      "headers": {
+        "server": "GitHub.com",
+        "location": null,
+        "content-type": "text/html; charset=utf-8",
+        "strict-transport-security": null,
+        "cache-control": "max-age=600"
+      }
+    },
+    {
+      "url": "https://orbytek.be/demos/immobilier/",
+      "status": 200,
+      "headers": {
+        "server": "GitHub.com",
+        "location": null,
+        "content-type": "text/html; charset=utf-8",
+        "strict-transport-security": null,
+        "cache-control": "max-age=600"
+      }
+    },
+    {
+      "url": "https://orbytek.be/demos/restaurant/",
+      "status": 200,
+      "headers": {
+        "server": "GitHub.com",
+        "location": null,
+        "content-type": "text/html; charset=utf-8",
+        "strict-transport-security": null,
+        "cache-control": "max-age=600"
+      }
+    },
+    {
+      "url": "https://orbytek.be/albert_65ans/",
+      "status": 200,
+      "headers": {
+        "server": "GitHub.com",
+        "location": null,
+        "content-type": "text/html; charset=utf-8",
+        "strict-transport-security": null,
+        "cache-control": "max-age=600"
+      }
+    },
+    {
+      "url": "https://orbytek.be/puériculture2/",
+      "status": 200,
+      "headers": {
+        "server": "GitHub.com",
+        "location": null,
+        "content-type": "text/html; charset=utf-8",
+        "strict-transport-security": null,
+        "cache-control": "max-age=600"
+      }
+    },
+    {
+      "url": "https://orbytek.be/premium-sites/la-laguna/",
+      "status": 200,
+      "headers": {
+        "server": "GitHub.com",
+        "location": null,
+        "content-type": "text/html; charset=utf-8",
+        "strict-transport-security": null,
+        "cache-control": "max-age=600"
+      }
+    },
+    {
+      "url": "https://orbytek.be/demos/paysagiste/",
+      "status": 200,
+      "headers": {
+        "server": "GitHub.com",
+        "location": null,
+        "content-type": "text/html; charset=utf-8",
+        "strict-transport-security": null,
+        "cache-control": "max-age=600"
+      }
+    },
+    {
+      "url": "https://orbytek.be/filmthibaut/",
+      "status": 200,
+      "headers": {
+        "server": "GitHub.com",
+        "location": null,
+        "content-type": "text/html; charset=utf-8",
+        "strict-transport-security": null,
+        "cache-control": "max-age=600"
+      }
+    },
+    {
+      "url": "https://orbytek.be/puériculture1/",
+      "status": 200,
+      "headers": {
+        "server": "GitHub.com",
+        "location": null,
+        "content-type": "text/html; charset=utf-8",
+        "strict-transport-security": null,
+        "cache-control": "max-age=600"
+      }
+    },
+    {
+      "url": "https://orbytek.be/rendezvous/",
+      "status": 200,
+      "headers": {
+        "server": "GitHub.com",
+        "location": null,
+        "content-type": "text/html; charset=utf-8",
+        "strict-transport-security": null,
+        "cache-control": "max-age=600"
+      }
+    }
+  ],
+  "github": [
+    {
+      "repo": "orbytek",
+      "status": 404,
+      "message": "Not Found"
+    },
+    {
+      "repo": "orbytek-staging",
+      "status": 404,
+      "message": "Not Found"
+    }
+  ],
+  "tls": [
+    {
+      "host": "orbytek.be",
+      "authorized": true,
+      "issuer": {
+        "C": "US",
+        "O": "Let's Encrypt",
+        "CN": "YR1"
+      },
+      "subject": {
+        "CN": "orbytek.be"
+      },
+      "subjectaltname": "DNS:orbytek.be, DNS:www.orbytek.be",
+      "valid_from": "Sep 30 13:17:33 2026 GMT",
+      "valid_to": "Dec 29 13:17:32 2026 GMT"
+    },
+    {
+      "host": "www.orbytek.be",
+      "authorized": true,
+      "issuer": {
+        "C": "US",
+        "O": "Let's Encrypt",
+        "CN": "YR1"
+      },
+      "subject": {
+        "CN": "orbytek.be"
+      },
+      "subjectaltname": "DNS:orbytek.be, DNS:www.orbytek.be",
+      "valid_from": "Sep 30 13:17:33 2026 GMT",
+      "valid_to": "Dec 29 13:17:32 2026 GMT"
+    },
+    {
+      "host": "test.orbytek.be",
+      "authorized": true,
+      "issuer": {
+        "C": "US",
+        "O": "Let's Encrypt",
+        "CN": "YR1"
+      },
+      "subject": {
+        "CN": "test.orbytek.be"
+      },
+      "subjectaltname": "DNS:test.orbytek.be",
+      "valid_from": "Oct 13 19:59:33 2026 GMT",
+      "valid_to": "Jan 11 19:59:32 2027 GMT"
+    }
+  ],
+  "comparisons": [
+    {
+      "path": "contact.js",
+      "status": 200,
+      "local_sha256": "7decbc03912f08519e63033d3bef6dcbb4c15e3fab58883f12546dd0f04e8ad5",
+      "remote_sha256": "7decbc03912f08519e63033d3bef6dcbb4c15e3fab58883f12546dd0f04e8ad5",
+      "identical": true
+    },
+    {
+      "path": "Facture/app.js",
+      "status": 200,
+      "local_sha256": "0fc196fe0ad79fb3b258d205d58276d67f8f2336ce37187c343ee7f27d5453d0",
+      "remote_sha256": "6e05075dbc6b89c93347743951e489dad350a7c2fbd5f5ada82252af15f545d2",
+      "identical": false
+    },
+    {
+      "path": "Voitures/data.js",
+      "status": 200,
+      "local_sha256": "d605d59bc99b7aed9a785a824c0653481092ff740d12ef3d909d72ac3ba8c7b2",
+      "remote_sha256": "d605d59bc99b7aed9a785a824c0653481092ff740d12ef3d909d72ac3ba8c7b2",
+      "identical": true
+    },
+    {
+      "path": "albert_65ans/app.js",
+      "status": 200,
+      "local_sha256": "3c080dc0c98cad6071429e3fa0bee07b6252738a588b550a053d77d636a73a84",
+      "remote_sha256": "3c080dc0c98cad6071429e3fa0bee07b6252738a588b550a053d77d636a73a84",
+      "identical": true
+    },
+    {
+      "path": "Archive/stream.js",
+      "status": 200,
+      "local_sha256": "77c9539cf9b7229dca8bd2cc53628bf104e72365162c939e3de923cef85b328e",
+      "remote_sha256": "776f6e0860703b879e7249ea48138322cf22fb110a12c2ec9816d706cdc8bcf7",
+      "identical": false
+    },
+    {
+      "path": "BD/albert/app.js",
+      "status": 200,
+      "local_sha256": "8d8e7d4a1ed9a996127c378f4fb62bb70fba65d2c3c5c6034d2721ff6f60e256",
+      "remote_sha256": "6c1decff14722f3e0a8b2f4bec90dd920e976e19817c0ed26560c59ffcc21aba",
+      "identical": false
+    }
+  ]
+}

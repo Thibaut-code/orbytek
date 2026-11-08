@@ -1,0 +1,9 @@
+{
+  "date": "2026-11-04T20:54:10.472Z",
+  "markdownFiles": 30,
+  "applicationSheets": 20,
+  "relativeLinksChecked": 304,
+  "mermaidBlocks": 12,
+  "errors": [],
+  "scope": "Existence des cibles de liens, clôture des blocs de code et recherche de motifs de secrets dans Markdown. Pas de validation visuelle Mermaid, de tests applicatifs ou de SQL distant."
+}
